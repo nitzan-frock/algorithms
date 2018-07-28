@@ -72,15 +72,6 @@ public class Deque <Item> implements Iterable<Item>{
 		last.next = null;
 		return item;
 	}
-
-	private void printList() {
-		Node x = first;
-		while (x.next != null) {
-			System.out.println(x.item);
-			x = x.next;
-		}
-		System.out.println(x.item);
-	}
 	
 	public Iterator<Item> iterator() {
 		return new ListIterator();
@@ -94,6 +85,7 @@ public class Deque <Item> implements Iterable<Item>{
 		}
 
 		public Item next() {
+			if (current.next == null) { throw new NoSuchElementException("There is not a next element."); }
 			Item item = current.item;
 			current = current.next;
 			return item;
@@ -105,21 +97,7 @@ public class Deque <Item> implements Iterable<Item>{
 	}
 	
 	public static void main(String[] args) {
-		Deque<Integer> deck = new Deque<Integer>();
-		/*for (int i = 0; i < 1; i++) {
-			deck.addFirst((int)Math.floor(Math.random()*10));
-			System.out.println(i+": ");
-			deck.forEach(num -> System.out.println(num));
-		}*/
-		deck.addFirst(4);
-		deck.addLast(5);
-		deck.addFirst(10);		
-		deck.printList();
-		System.out.println("last: " + deck.last.item);
-		System.out.println("removed last: " + deck.removeLast());
-		deck.printList();
-		deck.removeFirst();
-		deck.printList();
+		
 	}
 
 }
