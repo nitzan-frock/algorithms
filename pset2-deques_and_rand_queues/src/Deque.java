@@ -1,6 +1,8 @@
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import edu.princeton.cs.algs4.StdRandom;
+
 public class Deque <Item> implements Iterable<Item>{
 	
 	private Node first;
@@ -40,6 +42,7 @@ public class Deque <Item> implements Iterable<Item>{
 			newNode.next = first;
 			first = newNode;
 		}
+		size++;
 	}
 	
 	public void addLast (Item item) {
@@ -50,6 +53,7 @@ public class Deque <Item> implements Iterable<Item>{
 			first = last;
 		}
 		else oldLast.next = last;
+		size++;
 	}
 	
 	public Item removeFirst () {
@@ -57,19 +61,29 @@ public class Deque <Item> implements Iterable<Item>{
 		Item item = first.item;
 		first = first.next;
 		if (isEmpty()) last = null;
+		size--;
 		return item;
 	}
 	
 	public Item removeLast () {
-		System.out.println("[removeLast()]");
 		if (isEmpty()) throw new NoSuchElementException("The deque is empty.");
-		Item item = last.item;
-		Node x = first;
-		while (x.next.next != null) {
-			x = x.next;
+		
+		Item item;
+		
+		if (first == last) {
+			item = removeFirst();
+		} else {
+			item = last.item;
+			Node x = first;
+			
+			while (x.next.next != null) {
+				x = x.next;
+			}
+			last = x;
+			last.next = null;
+			size--;
 		}
-		last = x;
-		last.next = null;
+		
 		return item;
 	}
 	
@@ -85,7 +99,7 @@ public class Deque <Item> implements Iterable<Item>{
 		}
 
 		public Item next() {
-			if (current.next == null) { throw new NoSuchElementException("There is not a next element."); }
+			if (current == null) { throw new NoSuchElementException("There is not a next element."); }
 			Item item = current.item;
 			current = current.next;
 			return item;

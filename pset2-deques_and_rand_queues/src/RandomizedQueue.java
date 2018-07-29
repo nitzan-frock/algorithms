@@ -1,6 +1,8 @@
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+import edu.princeton.cs.algs4.StdRandom;
+
 public class RandomizedQueue <Item> implements Iterable <Item>{
 	private Item[] q;
 	private int N;
@@ -12,14 +14,11 @@ public class RandomizedQueue <Item> implements Iterable <Item>{
 	}
 	
 	public boolean isEmpty() {
-		if (q == null) {
-			return true;
-		}
-		return false;
+		return N == 0;
 	}
 	
 	public int size() {
-		return q.length;
+		return N;
 	}
 	
 	public void enqueue(Item item) {
@@ -31,7 +30,7 @@ public class RandomizedQueue <Item> implements Iterable <Item>{
 	public Item dequeue() {
 		if (N == 0) throw new NoSuchElementException("The queue is empty");
 		if (N > 0 && N == q.length/4) resize(q.length / 2);
-		int randIndex = (int) Math.floor(Math.random()*N);
+		int randIndex = StdRandom.uniform(N);
 		Item removed = q[randIndex];
 		for (int i = randIndex; i < N; i++) {
 			if (i+1 < N) {
@@ -54,7 +53,7 @@ public class RandomizedQueue <Item> implements Iterable <Item>{
 	
 	public Item sample() {
 		if (N == 0) throw new NoSuchElementException("The queue is empty");
-		int randIndex = (int) Math.floor(Math.random()*N);
+		int randIndex = StdRandom.uniform(N);
 		return q[randIndex];
 	}
 	
@@ -64,13 +63,32 @@ public class RandomizedQueue <Item> implements Iterable <Item>{
 	
 	private class ListIterator implements Iterator<Item> {
 		private int i;
+		private RandomizedQueue<Item> qUnique;
+		
+		ListIterator() {
+			RandomizedQueue<Item> tempQ = new RandomizedQueue<>();
+			qUnique = new RandomizedQueue<>();
+			
+			for (int ind = 0; ind < N; ind++) {
+				tempQ.enqueue(q[ind]);
+			}
+			
+			for (int ind = 0; ind < N; ind++) {
+				qUnique.enqueue(tempQ.dequeue());
+			}
+		}
 
 		public boolean hasNext() {
 			return i < N;
 		}
 
 		public Item next() {
-			return q[i++];
+			if (N == 0) { 
+				throw new NoSuchElementException("The queue is empty");
+			} else if (i == N) {
+				throw new NoSuchElementException("The queue is exhausted.)");
+			}
+			return qUnique.q[i++];
 		}
 		
 		public void remove() {
@@ -80,20 +98,17 @@ public class RandomizedQueue <Item> implements Iterable <Item>{
 	}
 	
 	public static void main (String[] args) {
-		RandomizedQueue<Integer> q = new RandomizedQueue<>();
-		q.enqueue(1);
-		q.enqueue(4);
-		q.enqueue(3);
-		int removed = q.dequeue();
-		System.out.println("sample: " + q.sample());
-		System.out.println("removed: " + removed);
-		
-		for (int el : q) {
-			System.out.println(el);
+		RandomizedQueue <Double> q = new RandomizedQueue<>();
+		for (int i = 0; i < 5; i++) {
+			q.enqueue(Math.floor(StdRandom.uniform()*10));
 		}
-		q.dequeue();
-		q.dequeue();
-		q.dequeue();
-		q.dequeue();
+		
+		q.forEach(el -> {
+			System.out.println("el: " + el);
+			
+			q.forEach(el2 -> {
+				System.out.println(el2);
+			});
+		});
 	}
 }

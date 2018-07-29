@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="src" path="pset1-percolation/src"/>
+	<classpathentry kind="src" path="pset2-deques_and_rand_queues/src"/>
+	<classpathentry kind="output" path="pset1-percolation/bin"/>
+</classpath>
