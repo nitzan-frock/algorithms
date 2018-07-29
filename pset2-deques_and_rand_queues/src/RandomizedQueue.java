@@ -98,17 +98,5 @@ public class RandomizedQueue <Item> implements Iterable <Item>{
 	}
 	
 	public static void main (String[] args) {
-		RandomizedQueue <Double> q = new RandomizedQueue<>();
-		for (int i = 0; i < 5; i++) {
-			q.enqueue(Math.floor(StdRandom.uniform()*10));
-		}
-		
-		q.forEach(el -> {
-			System.out.println("el: " + el);
-			
-			q.forEach(el2 -> {
-				System.out.println(el2);
-			});
-		});
 	}
 }
