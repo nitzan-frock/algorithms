@@ -1,4 +1,5 @@
 
+
 public class BruteCollinearPoints {
 	private LineSegment[] segments;
 	private int segmentsIndex;
@@ -17,7 +18,8 @@ public class BruteCollinearPoints {
 				}
 			}
 		}
-		this.points = points;		
+		this.points = points;
+		createSegments();
 	}
 	
 	private void createSegments() {
@@ -37,6 +39,7 @@ public class BruteCollinearPoints {
 							if (points[p].compareTo(points[q]) == -1 && 
 									points[p].compareTo(points[r]) == -1 && 
 									points[p].compareTo(points[s]) == -1){
+								System.out.println(points[p] +", "+points[q]+", "+points[r]+", "+points[s]);
 								segments[segmentsIndex] = new LineSegment(points[p], points[s]);
 								segmentsIndex++;
 							}
@@ -52,7 +55,6 @@ public class BruteCollinearPoints {
 	}
 	
 	public LineSegment[] segments() {
-		createSegments();
 		return segments;
 	}
 }

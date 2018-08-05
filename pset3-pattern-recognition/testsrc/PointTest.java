@@ -10,6 +10,8 @@ class PointTest {
 	private Point p2;
 	private Point p3;
 	private Point p4;
+	private Point p5;
+	private Point p6;
 
 	@BeforeEach
 	void setUp() throws Exception {
@@ -17,7 +19,8 @@ class PointTest {
 		p2 = new Point(2, 3);
 		p3 = new Point(1, 3);
 		p4 = new Point(4, 5);
-		
+		p5 = new Point(9000,32200);
+		p6 = new Point(400, 800);
 	}
 
 	@AfterEach
@@ -47,6 +50,11 @@ class PointTest {
 				() -> {
 					double result = Double.NEGATIVE_INFINITY;
 					assertEquals(result, p2.slopeTo(p2), "Same point (2, 3)");
+				},
+				() -> {
+					double result = 3.6511627907;
+					System.out.println(result);
+					assertEquals(result, p5.slopeTo(p6), "slope of p5 to p6");
 				}
 		);
 	}
