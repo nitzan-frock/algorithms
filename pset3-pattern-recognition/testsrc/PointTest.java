@@ -32,11 +32,11 @@ class PointTest {
 	void testSlopeTo() {
 		assertAll("Slopes", 
 				() -> {
-					double result = (3-1)/(2-1);
+					double result = (3.0-1.0)/(2.0-1.0);
 					assertEquals(result, p1.slopeTo(p2), "The slope between (1, 1) and (2, 3)");
 				},
 				() -> {
-					double result = (5-1)/(4-1);
+					double result = (5.0-1.0)/(4.0-1.0);
 					assertEquals(result, p1.slopeTo(p4), "The slope between (1, 1) and (4, 5)");
 				},
 				() -> {
@@ -52,8 +52,7 @@ class PointTest {
 					assertEquals(result, p2.slopeTo(p2), "Same point (2, 3)");
 				},
 				() -> {
-					double result = 3.6511627907;
-					System.out.println(result);
+					double result = (32200.0-800.0)/(9000.0-400.0);
 					assertEquals(result, p5.slopeTo(p6), "slope of p5 to p6");
 				}
 		);

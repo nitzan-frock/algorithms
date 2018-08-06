@@ -14,7 +14,7 @@ class BruteCollinearPointsTest {
 	@BeforeEach
 	void setUp() throws Exception {
 		System.out.println("Setup...");
-		Scanner sc = new Scanner(new File("D:\\Software Development\\IDEs\\eclipse-workspace\\algorithms\\pset3-pattern-recognition\\testsrc\\testData\\input10.txt"));
+		Scanner sc = new Scanner(new File("./testsrc/testData/input6.txt"));
 		int i = 0;
 		int n = sc.nextInt();
 		points = new Point[n];
@@ -34,7 +34,7 @@ class BruteCollinearPointsTest {
 
 	@Test
 	void testNumberOfSegments() {
-		int result = points.length;
+		int result = 4;
 		assertEquals(result, brute.numberOfSegments(), "Shows number of segments.");
 	}
 
