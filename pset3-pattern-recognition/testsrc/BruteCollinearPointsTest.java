@@ -14,7 +14,7 @@ class BruteCollinearPointsTest {
 	@BeforeEach
 	void setUp() throws Exception {
 		System.out.println("Setup...");
-		Scanner sc = new Scanner(new File("./testsrc/testData/input6.txt"));
+		Scanner sc = new Scanner(new File("./testsrc/testData/input100.txt"));
 		int i = 0;
 		int n = sc.nextInt();
 		points = new Point[n];
