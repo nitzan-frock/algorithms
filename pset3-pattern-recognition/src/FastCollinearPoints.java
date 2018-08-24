@@ -6,7 +6,7 @@ import java.util.Arrays;
  * @author nitzanf
  */
 public class FastCollinearPoints {
-    ArrayList<LineSegment> segments = new ArrayList<>();
+    private ArrayList<LineSegment> segments = new ArrayList<>();
     
     public FastCollinearPoints(Point[] points) {
         if (points == null) throw new IllegalArgumentException("Points cannot be empty.");
