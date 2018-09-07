@@ -7,6 +7,8 @@ public class Board {
 	private int dimension;
 	private int[][] blocks;
 	private int[][] goal;
+	private int empty_row;
+	private int empty_col;
 	private int hamming;
 	private int manhattan;
 	
@@ -14,17 +16,22 @@ public class Board {
 	public Board(int[][] blocks) {			
 		dimension = blocks.length;
 		this.blocks = blocks;
+		goal = new int[dimension][dimension];
 		
 		int position = 1;
 		for (int i = 0; i < dimension; i++) {
 			for (int j = 0; j < dimension; j++) {
+				if (blocks[i][j] == 0) {
+					empty_row = i;
+					empty_col = j;
+				}
 				if (position == dimension*dimension) {
 					goal[i][j] = 0;
+					break;
 				}
 				goal[i][j] = position++;
 			}
 		}
-		
 		calcHamming();
 		calcManhattan();
 	}
@@ -107,58 +114,51 @@ public class Board {
 	
 	// does this board equal y?
 	public boolean equals(Object y) {
-		return false;
+		Board check = (Board) y;
+		if (y == this) return true;
+		if (y == null || !(y instanceof Board) || check.dimension != dimension) return false;
+		for (int i = 0; i < dimension; i++) {
+			for (int j = 0; j < dimension; j++) {
+				if (check.blocks[i][j] != blocks[i][j]) return false;
+			}
+		}
+		return true;
 	}
 	
 	// all neighboring boards
 	public Iterable<Board> neighbors(){
-		return new Neighbors(blocks);
+		return new Neighbors();
 	}
 	
 	private class Neighbors implements Iterable<Board>{
 		private ArrayList<Board> neighbors;
+		private int[] rowMove = {1, 0, -1, 0};
+		private int[] colMove = {0, 1, 0, -1}; 
 		
-		private Neighbors(int[][] blocks) {
-			for (int i = 0; i < dimension; i++) {
-				for (int j = 0; j < dimension; j++) {
-					if (blocks[i][j] == 0) {
-						initializeNeighbors(blocks, i, j);
-					}
+		public Neighbors() {
+			neighbors = new ArrayList<Board>();
+			
+			for (int i = 0; i < 4; i++) {
+				int[][] copy = copyBlocks();
+				int newRow = empty_row + rowMove[i];
+				int newCol = empty_col + colMove[i];
+				
+				if (isInBounds(newRow, newCol)) {
+					copy[newRow][newCol] = blocks[empty_row][empty_col];
+					copy[empty_row][empty_col] = blocks[newRow][newCol];
+					neighbors.add(new Board(copy));
 				}
 			}
 		}
 		
-		private void initializeNeighbors(int[][] blocks, int row, int col) {
-			for (int i = -1; i <= 1; i++) {
-				for (int j = -1; j <= 1; j++) {
-					if (!(i == 0 && j == 0)) {
-						int[][] copy = copyBlocks(blocks);
-						
-					}
-				}
-			}
-			if (isTopEdge(row)){
-				if(isLeftEdge(col)) {
-					// top left: [0][0]
-					
-				}else if(isRightEdge(col)) {
-					// top right: [0][dimension-1]
-				}
-				
-			}else if (isBottomEdge(row)) {
-				if(isLeftEdge(col)) {
-					// bottom left: [dimension-1][0]
-				}else if(isRightEdge(col)) {
-					// bottom right: [dimension-1][dimension-1]
-				}
-			} else if (isRightEdge(col)) {
-				
-			} else if (isLeftEdge(col)) {
-				
-			}
+		private boolean isInBounds(int row, int col) {
+			return (row >= 0 && 
+					row < dimension && 
+					col >= 0 &&
+					col < dimension);
 		}
 		
-		private int[][] copyBlocks(int[][] blocks){
+		private int[][] copyBlocks(){
 			int[][] copy = new int[dimension][dimension];
 			for (int i = 0; i < dimension; i++) {
 				for (int j = 0; j < dimension; j++) {
@@ -168,44 +168,57 @@ public class Board {
 			return copy;
 		}
 		
-		private boolean isTopEdge(int row) {
-			return row == 0;
-		}
-		
-		private boolean isBottomEdge(int row) {
-			return row == dimension-1;
-		}
-		
-		private boolean isLeftEdge(int col) {
-			return col == 0;
-		}
-		
-		private boolean isRightEdge(int col) {
-			return col == dimension-1;
-		}
-		
 		public Iterator<Board> iterator() {
 			return new NeighborsIterator();
 		}
 		
 		private class NeighborsIterator implements Iterator<Board>{
+			private ArrayList<Board> copy;
+			private int first = 0;
+			
+			public NeighborsIterator() {
+				copy = new ArrayList<Board>(neighbors);
+			}
+			
 			public boolean hasNext() {
-				return false;
+				return !copy.isEmpty();
 			}
 
 			public Board next() {
-				return null;
+				return copy.remove(first);
 			}
 		}
 	}
 	
 	// string representation of this board (in the output format specified below)
 	public String toString() {
-		
+		StringBuilder strBoard = new StringBuilder();
+		for (int i = 0; i < dimension; i++) {
+			for (int j = 0; j < dimension; j++) {
+				if (dimension > 3 && blocks[i][j] < 10) {
+					strBoard.append(" ");
+				}
+				strBoard.append(blocks[i][j]);
+				strBoard.append(" ");
+			}
+			strBoard.append("\n");
+		}
+		return strBoard.toString();
 	}
 	
 	// unit tests (not graded)
 	public static void main(String[] args) {
+		int[][] blocks = {
+				{3, 4, 0},
+				{1, 2, 8},
+				{5, 6, 7},
+		};
+		Board b = new Board(blocks);
+		System.out.println(b.toString());
+		System.out.println(b.manhattan());
 		
-	} 
+		for(Board n : b.neighbors()) {
+			System.out.println(n.toString());
+		}
+	}
 }
