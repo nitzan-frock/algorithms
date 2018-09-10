@@ -1,12 +1,12 @@
 import java.util.ArrayList;
 import java.util.Iterator;
-
-import edu.princeton.cs.algs4.MinPQ;
+import java.util.NoSuchElementException;
 
 public class Board {
-	private int dimension;
-	private int[][] blocks;
+	private Point[] goalCoordinates;
 	private int[][] goal;
+	private int[][] blocks;
+	private int dimension;
 	private int empty_row;
 	private int empty_col;
 	private int hamming;
@@ -15,8 +15,9 @@ public class Board {
 	// construct a board from an n-by-n array of blocks (where blocks[i][j] = block in row i, column j)
 	public Board(int[][] blocks) {			
 		dimension = blocks.length;
-		this.blocks = blocks;
+		this.blocks = copyBlocks(blocks);
 		goal = new int[dimension][dimension];
+		goalCoordinates = new Point[dimension*dimension];
 		
 		int position = 1;
 		for (int i = 0; i < dimension; i++) {
@@ -29,11 +30,40 @@ public class Board {
 					goal[i][j] = 0;
 					break;
 				}
+				goalCoordinates[position] = new Point(i, j);
 				goal[i][j] = position++;
 			}
 		}
 		calcHamming();
 		calcManhattan();
+	}
+	
+	private int[][] copyBlocks(int[][] blocks){
+		int[][] copy = new int[dimension][dimension];
+		for (int i = 0; i < dimension; i++) {
+			for (int j = 0; j < dimension; j++) {
+				copy[i][j] = blocks[i][j];
+			}
+		}
+		return copy;
+	}
+	
+	private class Point {
+		private int row;
+		private int col;
+		
+		public Point(int row, int col) {
+			this.row = row;
+			this.col = col;
+		}
+		
+		public int getRow() {
+			return row;
+		}
+		
+		public int getCol() {
+			return col;
+		}
 	}
 	
 	// board dimension n
@@ -50,7 +80,7 @@ public class Board {
 		hamming = 0;
 		for (int i = 0; i < dimension; i++) {
 			for (int j = 0; j < dimension; j++) {
-				if (blocks[i][j] != goal[i][j]) {
+				if (blocks[i][j] != goal[i][j] && blocks[i][j] != 0) {
 					hamming++;
 				}
 			}
@@ -64,23 +94,18 @@ public class Board {
 	
 	private void calcManhattan() {
 		manhattan = 0;
-		int n2 = dimension*dimension;
 		for (int i = 0; i < dimension; i++) {
 			for (int j = 0; j < dimension; j++) {
-				if (blocks[i][j] != goal[i][j]) {
-					int goal_i = n2 - (n2 - blocks[i][j]) - 1;
-					int current_i = xyTo1D(i, j);
-					int rowsOOP = Math.abs(goal_i - current_i) % dimension; // rows out of place
-					int colsOOP = Math.abs(current_i - goal_i - (rowsOOP - dimension)); // cols out of place
+				if (blocks[i][j] != goal[i][j] && blocks[i][j] != 0) {
+					Point goal = goalCoordinates[blocks[i][j]];
+					int targetRow = goal.getRow();
+					int targetCol = goal.getCol();
+					int rowsOOP = Math.abs(targetRow - i);
+					int colsOOP = Math.abs(targetCol - j);
 					manhattan += rowsOOP + colsOOP;
 				}
 			}
 		}
-	}
-	
-	private int xyTo1D(int y, int x) {
-		int index = x + dimension * (y - 1);
-		return index;
 	}
 	
 	// is this board the goal board?
@@ -105,6 +130,15 @@ public class Board {
 			}
 		}
 		
+		int swap;
+		
+		for (int i = 0; i < dimension; i++) {
+			for (int j = 0; j < dimension; j++) {
+				if (temp[i][j] != 0) {
+					swap = temp[i][j];
+				}
+			}
+		}
 		int swap = temp[0][0];
 		temp[0][0] = temp[0][1];
 		temp[0][1] = swap;
@@ -114,12 +148,11 @@ public class Board {
 	
 	// does this board equal y?
 	public boolean equals(Object y) {
-		Board check = (Board) y;
 		if (y == this) return true;
-		if (y == null || !(y instanceof Board) || check.dimension != dimension) return false;
+		if (!(y instanceof Board) || ((Board) y).dimension != dimension) return false;
 		for (int i = 0; i < dimension; i++) {
 			for (int j = 0; j < dimension; j++) {
-				if (check.blocks[i][j] != blocks[i][j]) return false;
+				if (((Board) y).blocks[i][j] != blocks[i][j]) return false;
 			}
 		}
 		return true;
@@ -135,11 +168,11 @@ public class Board {
 		private int[] rowMove = {1, 0, -1, 0};
 		private int[] colMove = {0, 1, 0, -1}; 
 		
-		public Neighbors() {
+		private Neighbors() {
 			neighbors = new ArrayList<Board>();
 			
 			for (int i = 0; i < 4; i++) {
-				int[][] copy = copyBlocks();
+				int[][] copy = copyBlocks(blocks);
 				int newRow = empty_row + rowMove[i];
 				int newCol = empty_col + colMove[i];
 				
@@ -158,16 +191,6 @@ public class Board {
 					col < dimension);
 		}
 		
-		private int[][] copyBlocks(){
-			int[][] copy = new int[dimension][dimension];
-			for (int i = 0; i < dimension; i++) {
-				for (int j = 0; j < dimension; j++) {
-					copy[i][j] = blocks[i][j];
-				}
-			}
-			return copy;
-		}
-		
 		public Iterator<Board> iterator() {
 			return new NeighborsIterator();
 		}
@@ -176,7 +199,7 @@ public class Board {
 			private ArrayList<Board> copy;
 			private int first = 0;
 			
-			public NeighborsIterator() {
+			private NeighborsIterator() {
 				copy = new ArrayList<Board>(neighbors);
 			}
 			
@@ -185,6 +208,7 @@ public class Board {
 			}
 
 			public Board next() {
+				if (!hasNext()) throw new NoSuchElementException("No elements.");
 				return copy.remove(first);
 			}
 		}
@@ -193,6 +217,7 @@ public class Board {
 	// string representation of this board (in the output format specified below)
 	public String toString() {
 		StringBuilder strBoard = new StringBuilder();
+		strBoard.append(dimension + "\n");
 		for (int i = 0; i < dimension; i++) {
 			for (int j = 0; j < dimension; j++) {
 				if (dimension > 3 && blocks[i][j] < 10) {
@@ -208,17 +233,5 @@ public class Board {
 	
 	// unit tests (not graded)
 	public static void main(String[] args) {
-		int[][] blocks = {
-				{3, 4, 0},
-				{1, 2, 8},
-				{5, 6, 7},
-		};
-		Board b = new Board(blocks);
-		System.out.println(b.toString());
-		System.out.println(b.manhattan());
-		
-		for(Board n : b.neighbors()) {
-			System.out.println(n.toString());
-		}
 	}
 }
