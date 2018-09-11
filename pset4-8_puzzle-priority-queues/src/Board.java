@@ -3,8 +3,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 public class Board {
-	private Point[] goalCoordinates;
-	private int[][] goal;
+	private int[][] goalCoordinates;
 	private int[][] blocks;
 	private int dimension;
 	private int empty_row;
@@ -16,8 +15,7 @@ public class Board {
 	public Board(int[][] blocks) {			
 		dimension = blocks.length;
 		this.blocks = copyBlocks(blocks);
-		goal = new int[dimension][dimension];
-		goalCoordinates = new Point[dimension*dimension];
+		goalCoordinates = new int[dimension*dimension+1][2];
 		
 		int position = 1;
 		for (int i = 0; i < dimension; i++) {
@@ -26,12 +24,7 @@ public class Board {
 					empty_row = i;
 					empty_col = j;
 				}
-				if (position == dimension*dimension) {
-					goal[i][j] = 0;
-					break;
-				}
-				goalCoordinates[position] = new Point(i, j);
-				goal[i][j] = position++;
+				goalCoordinates[position++] = new int[]{i, j};
 			}
 		}
 		calcHamming();
@@ -48,24 +41,6 @@ public class Board {
 		return copy;
 	}
 	
-	private class Point {
-		private int row;
-		private int col;
-		
-		public Point(int row, int col) {
-			this.row = row;
-			this.col = col;
-		}
-		
-		public int getRow() {
-			return row;
-		}
-		
-		public int getCol() {
-			return col;
-		}
-	}
-	
 	// board dimension n
 	public int dimension() {
 		return dimension;
@@ -78,9 +53,10 @@ public class Board {
 	
 	private void calcHamming() {
 		hamming = 0;
+		int position = 1;
 		for (int i = 0; i < dimension; i++) {
 			for (int j = 0; j < dimension; j++) {
-				if (blocks[i][j] != goal[i][j] && blocks[i][j] != 0) {
+				if (blocks[i][j] != position++ && blocks[i][j] != 0) {
 					hamming++;
 				}
 			}
@@ -94,12 +70,13 @@ public class Board {
 	
 	private void calcManhattan() {
 		manhattan = 0;
+		int position = 1;
 		for (int i = 0; i < dimension; i++) {
 			for (int j = 0; j < dimension; j++) {
-				if (blocks[i][j] != goal[i][j] && blocks[i][j] != 0) {
-					Point goal = goalCoordinates[blocks[i][j]];
-					int targetRow = goal.getRow();
-					int targetCol = goal.getCol();
+				if (blocks[i][j] != position++ && blocks[i][j] != 0) {
+					int[] goal = goalCoordinates[blocks[i][j]];
+					int targetRow = goal[0];
+					int targetCol = goal[1];
 					int rowsOOP = Math.abs(targetRow - i);
 					int colsOOP = Math.abs(targetCol - j);
 					manhattan += rowsOOP + colsOOP;
@@ -110,9 +87,10 @@ public class Board {
 	
 	// is this board the goal board?
 	public boolean isGoal() {
+		int position = 1;
 		for (int i = 0; i < dimension; i++) {
 			for (int j = 0; j < dimension; j++) {
-				if (blocks[i][j] != goal[i][j]) {
+				if (blocks[i][j] != position++ && blocks[i][j] != 0) {
 					return false;
 				}
 			}
@@ -120,30 +98,36 @@ public class Board {
 		return true;
 	}
 	
+	private int toCol (int index) {
+		return index % dimension;
+	}
+	
+	private int toRow (int index) {
+		return index / dimension;
+	}
+	
 	// a board that is obtained by exchanging any pair of blocks
 	public Board twin() {
-		int[][] temp = new int[dimension][dimension];
+		int[][] temp = copyBlocks(blocks);
 		
-		for (int i = 0; i < dimension; i++) {
-			for (int j = 0; j < dimension; j++) {
-				temp[i][j] = blocks[i][j];
-			}
+		int index = 0;
+		int swap = 1;
+		
+		while (temp[toRow(index)][toCol(index)] == 0 || temp[toRow(swap)][toCol(swap)] == 0) {
+			index++;
+			swap++;
 		}
 		
-		int swap;
+		Board twin = new Board(swap(temp, toRow(index), toCol(index), toRow(swap), toCol(swap)));
 		
-		for (int i = 0; i < dimension; i++) {
-			for (int j = 0; j < dimension; j++) {
-				if (temp[i][j] != 0) {
-					swap = temp[i][j];
-				}
-			}
-		}
-		int swap = temp[0][0];
-		temp[0][0] = temp[0][1];
-		temp[0][1] = swap;
-		
-		return new Board(temp);
+		return twin;
+	}
+	
+	private int[][] swap(int[][] blocks, int row, int col, int rowSwap, int colSwap) {
+		int swap = blocks[row][col];
+		blocks[row][col] = blocks[rowSwap][colSwap];
+		blocks[rowSwap][colSwap] = swap;
+		return blocks;
 	}
 	
 	// does this board equal y?
@@ -223,8 +207,7 @@ public class Board {
 				if (dimension > 3 && blocks[i][j] < 10) {
 					strBoard.append(" ");
 				}
-				strBoard.append(blocks[i][j]);
-				strBoard.append(" ");
+				strBoard.append(blocks[i][j] + " ");
 			}
 			strBoard.append("\n");
 		}
